@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>pro</title>
+    <title>fireworks</title>
 </head>
 
 <body>
@@ -25,8 +25,8 @@
 </body>
 <style>
     canvas {
-        width: 100vw;
-        height: 100vh;
+        width: 95vw;
+        height: 95vh;
         padding: 0;
         margin: 0;
         border: 1px solid cyan;
@@ -51,8 +51,8 @@
     button {
         font-size: 20px;
         padding: 2px;
-        margin: 2px;
-        border: 2px;
+        margin: 5px;
+        border: 4px;
     }
 </style>
 <script>
@@ -79,7 +79,6 @@
                 .querySelector("#btn1").innerHTML = "floor on");
         };
     });
-    //deepseek code
     function r(m, n, minPercentage = 0.01) {
         let numbers = [];
         let remaining = m;
@@ -93,7 +92,6 @@
         numbers.push(remaining);
         return numbers;
     };
-    //deepseek code ends here
     random_impulse = () => {
         m1 = Math.tan(Math.random() * Math.PI);
         im = Math.random() * m_t * e_i;
@@ -248,5 +246,6 @@
     };
     document.querySelector("#btn2").addEventListener("click", getv);
 </script>
+
 
 </html>
