@@ -9,11 +9,11 @@
 
 <body>
     <span>
-        <input type="number" id="inp1" placeholder="u metres/s" value="100">
-        <input type="number" id="inp2" placeholder="tan theta" value="0.75">
+        <input type="number" id="inp1" placeholder="u metres/s" value="200">
+        <input type="number" id="inp2" placeholder="tan theta" value="3">
         <input type="number" id="inp3" placeholder="render time ms" value="100">
-        <input type="number" id="inp4" placeholder="number of particles" value="1">
-        <input type="number" id="inp5" placeholder="pixel per kilometre" value="200">
+        <input type="number" id="inp4" placeholder="number of particles" value="50">
+        <input type="number" id="inp5" placeholder="pixel per kilometre" value="50">
         <input type="number" id="inp6" placeholder="mass Kg" value="10">
         <input type="number" id="inp7" placeholder="explosion index per mass unit" value="10">
         <input type="number" id="inp8" placeholder="g m / s^2" value="-10">
@@ -29,7 +29,7 @@
         height: 95vh;
         padding: 0;
         margin: 0;
-        border: 1px solid cyan;
+        border: 4px solid cyan;
     }
 
     body {
@@ -50,9 +50,9 @@
     input,
     button {
         font-size: 20px;
-        padding: 2px;
-        margin: 5px;
-        border: 4px;
+        padding: 5px;
+        margin: 4px;
+        border: 2px;
     }
 </style>
 <script>
@@ -79,7 +79,7 @@
                 .querySelector("#btn1").innerHTML = "floor on");
         };
     });
-    function r(m, n, minPercentage = 0.01) {
+    r=(m, n, minPercentage = 0.01)=> {
         let numbers = [];
         let remaining = m;
         const minValue = m * minPercentage;
@@ -246,6 +246,5 @@
     };
     document.querySelector("#btn2").addEventListener("click", getv);
 </script>
-
 
 </html>
