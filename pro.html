@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>pro</title>
+</head>
+
+<body>
+    <span>
+        <input type="number" id="inp1" placeholder="u metres/s" value="100">
+        <input type="number" id="inp2" placeholder="tan theta" value="0.75">
+        <input type="number" id="inp3" placeholder="render time ms" value="100">
+        <input type="number" id="inp4" placeholder="number of particles" value="1">
+        <input type="number" id="inp5" placeholder="pixel per kilometre" value="200">
+        <input type="number" id="inp6" placeholder="mass Kg" value="10">
+        <input type="number" id="inp7" placeholder="explosion index per mass unit" value="10">
+        <input type="number" id="inp8" placeholder="g m / s^2" value="-10">
+        <button id="btn1">floor on</button>
+        <button id="btn2">render coords</button>
+        <button id="btn3">explode</button>
+    </span>
+    <canvas></canvas>
+</body>
+<style>
+    canvas {
+        width: 100vw;
+        height: 100vh;
+        padding: 0;
+        margin: 0;
+        border: 1px solid cyan;
+    }
+
+    body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-items: center;
+    }
+
+    input {
+        background-color: cadetblue;
+    }
+
+    button {
+        background-color: lime;
+    }
+
+    input,
+    button {
+        font-size: 20px;
+        padding: 2px;
+        margin: 2px;
+        border: 2px;
+    }
+</style>
+<script>
+    canvas = document.querySelector("canvas");
+    ctx = canvas.getContext("2d");
+    f = true;
+    p_m = 0;
+    p = false;
+    e = false;
+    g = -10;
+    np = 0;
+    rt = 0;
+    ts = 0;
+    com_trail = [];
+    m_t = 0;
+    e_i = 0;
+    v = 0;
+    t = 0;
+    npl = [];
+    let c;
+    document.querySelector("#btn1").addEventListener("click", () => {
+        if (!p) {
+            f ? (f = false, document.querySelector("#btn1").innerHTML = "floor off") : (f = true, document
+                .querySelector("#btn1").innerHTML = "floor on");
+        };
+    });
+    //deepseek code
+    function r(m, n, minPercentage = 0.01) {
+        let numbers = [];
+        let remaining = m;
+        const minValue = m * minPercentage;
+        for (let i = 0; i < n - 1; i++) {
+            let max = remaining - (minValue * (n - i - 1));
+            let randomNum = minValue + (Math.random() * (max - minValue));
+            numbers.push(randomNum);
+            remaining -= randomNum;
+        };
+        numbers.push(remaining);
+        return numbers;
+    };
+    //deepseek code ends here
+    random_impulse = () => {
+        m1 = Math.tan(Math.random() * Math.PI);
+        im = Math.random() * m_t * e_i;
+        imx = im / (1 + m1 ** 2) ** 0.5;
+        imy = im * m1 / (1 + m1 ** 2) ** 0.5;
+        i1 = Math.floor(Math.random() * np);
+        i2 = Math.floor(Math.random() * np);
+        npl[i1].ux += imx / npl[i1].m;
+        npl[i1].uy += imy / npl[i1].m;
+        npl[i2].ux += -imx / npl[i2].m;
+        npl[i2].uy += -imy / npl[i2].m;
+    };
+    document.querySelector("#btn3").addEventListener("click", () => {
+        if (!e && p) {
+            e = true;
+            for (i = 0; i < np; i++) {
+                random_impulse();
+            };
+        };
+    });
+    com_coords = () => {
+        xcom = 0;
+        ycom = 0;
+        for (i = 0; i < np; i++) {
+            xcom += npl[i].m * npl[i].x;
+            ycom += npl[i].m * npl[i].y;
+        };
+        xcom /= m_t;
+        ycom /= m_t;
+        com_trail.push([xcom, ycom]);
+    };
+    getRandomHexColor = () => {
+        return '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
+    };
+    getv = () => {
+        if (!p) {
+            p = true;
+            e_i = parseFloat(document.querySelector("#inp7").value);
+            m_t = parseFloat(document.querySelector("#inp6").value);
+            g = parseFloat(document.querySelector("#inp8").value);
+            np = parseInt(document.querySelector("#inp4").value);
+            rt = parseInt(document.querySelector("#inp3").value);
+            p_m = parseFloat(document.querySelector("#inp5").value) / 1000;
+            document.querySelector("#btn2").innerHTML = "render reset";
+            v = document.querySelector("#inp1").value;
+            t = document.querySelector("#inp2").value;
+            ux_ = v / (1 + t * t) ** 0.5;
+            uy_ = v * t / (1 + t * t) ** 0.5;
+            l = r(parseFloat(document.querySelector("#inp6").value), np, 0.03);
+            for (i = 0; i < np; i++) {
+                npl.push({
+                    x: 0,
+                    y: 0,
+                    ux: ux_,
+                    uy: uy_,
+                    h: false,
+                    m: l[i],
+                    col: getRandomHexColor()
+                });
+            };
+            render();
+        } else {
+            p = false;
+            document.querySelector("#btn2").innerHTML = "render coords";
+        };
+    };
+    freefall = (a) => {
+        p1 = a;
+        if (!p1.h) {
+            nx = p1.x + p1.ux * rt / 1000;
+            ny = p1.y + p1.uy * rt / 1000 + g / 2000000 * rt ** 2;
+            nuy = p1.uy + g * rt / 1000;
+            if (f) {
+                if (ny >= 0) {
+                    p1.x = nx;
+                    p1.y = ny;
+                    p1.uy = nuy;
+                } else {
+                    dt = (p1.uy + ((p1.uy) ** 2 - 2 * g * p1.y) ** 0.5) / (-g);
+                    nx = p1.x + p1.ux * dt;
+                    p1.uy = 0;
+                    p1.ux = 0;
+                    p1.y = 0;
+                    p1.x = nx;
+                    p1.h = true;
+                };
+            } else {
+                p1.x = nx;
+                p1.y = ny;
+                p1.uy = nuy;
+            };
+        };
+        return p1;
+    };
+    reset = () => {
+        npl = [];
+        ts = 0;
+        v = 0;
+        g = 10;
+        p_m = 0;
+        t = 0;
+        rt = 0;
+        e_i = 0;
+        com_trail = [];
+        e = false;
+        m_t = 0;
+        np = 0;
+        clearInterval(c)
+    };
+    draw_canvas = () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for (i = 0; i < np; i++) {
+            ctx.beginPath();
+            co = npl[i].col;
+            ctx.lineWidth = 4;
+            ctx.strokeStyle = "gray";
+            ctx.moveTo(10, 0);
+            ctx.lineTo(10, canvas.height);
+            ctx.moveTo(0, canvas.height - 10);
+            ctx.lineTo(canvas.width, canvas.height - 10);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.strokeStyle = co;
+            ctx.fillStyle = co;
+            ctx.lineWidth = 1;
+            ctx.arc(npl[i].x * p_m + 10, canvas.height - npl[i].y * p_m - 10, 2, 0, 2 * Math.PI);
+            ctx.fillstyle = co;
+            ctx.fill();
+            ctx.stroke();
+        };
+        for (i = 0; i < com_trail.length - 1; i++) {
+            ctx.beginPath();
+            ctx.strokestyle = "brown";
+            ctx.lineWidth = 3;
+            ctx.moveTo(com_trail[i][0] * p_m + 10, canvas.height - 10 - com_trail[i][1] * p_m);
+            ctx.lineTo(com_trail[i + 1][0] * p_m + 10, canvas.height - 10 - com_trail[i + 1][1] * p_m);
+            ctx.stroke();
+        };
+    };
+    render = () => {
+        c = setInterval(() => {
+            ts += rt;
+            for (i = 0; i < np; i++) {
+                npl[i] = freefall(npl[i]);
+            };
+            com_coords();
+            draw_canvas();
+            if (!p) {
+                reset();
+            };
+        }, rt);
+    };
+    document.querySelector("#btn2").addEventListener("click", getv);
+</script>
+
+</html>
